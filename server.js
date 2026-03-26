@@ -81,7 +81,8 @@ app.post('/api/behavior-update',(req,res)=>{
 app.get('/api/logs',(req,res)=>res.json(loadDB().guests));
 app.get('/api/logs/:id',(req,res)=>{const g=loadDB().guests[req.params.id];return g?res.json(g):res.status(404).json({error:'Not found.'});});
 
-// ── Admin dashboard ────────────────────────────
+// ── Routes ────────────────────────────
+app.get('/',(req,res)=>res.sendFile(path.join(__dirname,'HomePage.html')));
 app.get('/admin',(req,res)=>res.sendFile(path.join(__dirname,'admin.html')));
 
 app.delete('/api/logs/clear', (req,res)=>{
