@@ -13,7 +13,6 @@ const TRIAL=5;
 function getIP(req){return req.headers['x-forwarded-for']?.split(',')[0].trim()||req.headers['x-real-ip']||req.socket.remoteAddress||'unknown';}
 async function enrichIP(ip, fallbackIP){
   if(ip==='127.0.0.1'||ip==='::1'||ip.startsWith('::ffff:127')){
-    // Running locally — try to enrich the client-reported IP instead
     if(fallbackIP && fallbackIP!==ip){
       try{const{default:fetch}=await import('node-fetch');const r=await fetch(`https://ipapi.co/${fallbackIP}/json/`);return await r.json();}catch{}
     }
@@ -81,7 +80,7 @@ app.post('/api/behavior-update',(req,res)=>{
 app.get('/api/logs',(req,res)=>res.json(loadDB().guests));
 app.get('/api/logs/:id',(req,res)=>{const g=loadDB().guests[req.params.id];return g?res.json(g):res.status(404).json({error:'Not found.'});});
 
-// ── Routes ────────────────────────────
+// ── Routes ─────────────────────────────────────
 app.get('/',(req,res)=>res.sendFile(path.join(__dirname,'HomePage.html')));
 app.get('/admin',(req,res)=>res.sendFile(path.join(__dirname,'admin.html')));
 
