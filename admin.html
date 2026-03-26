@@ -641,10 +641,10 @@ async function confirmClear(){
   const pw = document.getElementById('clear-pass-input').value;
   if(!pw){ document.getElementById('clear-error').textContent = 'Please enter the password.'; return; }
   try{
-    const res = await fetch('http://localhost:3000/api/logs/clear', {
-      method:'DELETE',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({password: pw})
+    const res = await fetch(window.location.origin + '/api/logs/clear', {
+    method:'DELETE',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({password: pw})
     });
     const data = await res.json();
     if(!res.ok){ document.getElementById('clear-error').textContent = data.error || 'Wrong password.'; return; }
