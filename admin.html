@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>One MFB — Signal Admin</title>
+<link rel="stylesheet" href="back.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-orb bg-orb1"></div>
+<div class="bg-orb bg-orb2"></div>
+
+<!-- ─── TOPBAR ──────────────────────────────── -->
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="/" class="topbar-logo">
+      <svg width="34" height="34" viewBox="0 0 42 42" fill="none">
+        <defs>
+          <linearGradient id="oT" x1="21" y1="3" x2="21" y2="21" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#f0e0b0"/>
+          </linearGradient>
+          <linearGradient id="oB" x1="21" y1="21" x2="21" y2="39" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#c9893a"/><stop offset="100%" stop-color="#5e2d06"/>
+          </linearGradient>
+          <clipPath id="cT2"><rect x="0" y="0" width="42" height="21.5"/></clipPath>
+          <clipPath id="cB2"><rect x="0" y="21.5" width="42" height="20.5"/></clipPath>
+        </defs>
+        <circle cx="21" cy="21" r="17.5" stroke="url(#oT)" stroke-width="5.5" fill="none" clip-path="url(#cT2)"/>
+        <circle cx="21" cy="21" r="17.5" stroke="url(#oB)" stroke-width="5.5" fill="none" clip-path="url(#cB2)"/>
+        <circle cx="21" cy="21" r="12" fill="rgba(201,168,76,0.07)"/>
+        <text x="21" y="26.5" text-anchor="middle" font-size="11.5" font-weight="800" fill="#e8c66a" font-family="Syne,sans-serif" letter-spacing="-0.8">ne</text>
+      </svg>
+      <span class="topbar-logo-text">One MFB</span>
+    </a>
+    <div class="topbar-divider"></div>
+    <span class="topbar-title">Signal Admin</span>
+  </div>
+  <div class="topbar-right">
+    <div class="live-badge"><div class="dot"></div>Live</div>
+    <button class="topbar-refresh" style="background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.35);color:#f87171" onclick="showClearModal()">
+     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6m4-6v6"/><path d="M9 6V4h6v2"/></svg>
+      Clear Data
+    </button>
+    <button class="topbar-refresh" id="refresh-btn" onclick="loadAdminData()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/>
+        <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>
+      </svg>
+      Refresh
+    </button>
+  </div>
+</div>
+
+<!-- ─── LAYOUT ──────────────────────────────── -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">Overview</div>
+    <div class="sidebar-item active" onclick="switchView('guests')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M19 11v6m-3-3h6" stroke-width="2"/></svg>
+      All Guests
+      <span class="sidebar-count" id="sc-all">0</span>
+    </div>
+    <div class="sidebar-item" onclick="switchView('blocked')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+      Blocked / Evading
+      <span class="sidebar-count" id="sc-blocked">0</span>
+    </div>
+    <div class="sidebar-item" onclick="switchView('warning')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Near Limit
+      <span class="sidebar-count" id="sc-warn">0</span>
+    </div>
+    <div class="sidebar-item" onclick="switchView('clean')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      Clean
+      <span class="sidebar-count" id="sc-clean">0</span>
+    </div>
+    <div class="sidebar-section" style="margin-top:.8rem">Signals</div>
+    <div class="sidebar-item" onclick="switchView('fingerprints')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Fingerprints
+    </div>
+    <div class="sidebar-item" onclick="switchView('ips')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      IP & Geo
+    </div>
+    <div class="sidebar-item" onclick="switchView('behavioral')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Behavioral
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="main-content">
+    <div class="loader" id="loader"><div class="spinner"></div></div>
+    <div id="view-container" style="display:none"></div>
+  </main>
+</div>
+
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg"></span></div>
+
+<script>
+const ADMIN_API = window.location.origin + '/api/logs';
+let allGuests   = {};
+let currentView = 'guests';
+
+// ── Toast ──────────────────────────────────────────
+function adminToast(msg, dur=3000){
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), dur);
+}
+
+// ── Copy ───────────────────────────────────────────
+function copyText(text){
+  navigator.clipboard?.writeText(text).then(()=>adminToast('Copied!', 1500));
+}
+
+// ── Geo resolver: handles both field name formats ──
+// ipapi.co returns country_name on server-side enrichment
+// but the geoHistory object may store it as .country or .country_name
+function geoCountry(geo)  { return geo?.country      || geo?.country_name  || '—'; }
+function geoCity(geo)     { return geo?.city         || '—'; }
+function geoISP(geo)      { return geo?.isp          || geo?.org           || '—'; }
+function geoASN(geo)      { return geo?.asn          || '—'; }
+
+// ── Best geo for a guest ───────────────────────────
+// Tries geoHistory first, then falls back to last visit's clientIP
+function bestGeo(g){
+  const fromHistory = g.geoHistory?.[0] || {};
+  const fromClient  = g.visits?.[g.visits.length-1]?.clientIP || {};
+  return {
+    country: geoCountry(fromHistory) !== '—' ? geoCountry(fromHistory) : (fromClient.country_name || fromClient.country || '—'),
+    city:    geoCity(fromHistory)    !== '—' ? geoCity(fromHistory)    : (fromClient.city || '—'),
+    isp:     geoISP(fromHistory)     !== '—' ? geoISP(fromHistory)     : (fromClient.org  || fromClient.isp || '—'),
+    asn:     geoASN(fromHistory)     !== '—' ? geoASN(fromHistory)     : (fromClient.asn  || '—'),
+  };
+}
+
+// ── Load data ──────────────────────────────────────
+async function loadAdminData(){
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  try {
+    const res = await fetch(ADMIN_API);
+    if(!res.ok) throw new Error('Server responded with '+res.status);
+    allGuests = await res.json();
+    updateSidebar();
+    renderView(currentView);
+    adminToast('✓ Data refreshed');
+  } catch(e){
+    renderError(e.message);
+    adminToast('⚠️ Could not reach server');
+  } finally {
+    btn.classList.remove('spinning');
+  }
+}
+
+// ── Sidebar counts ─────────────────────────────────
+function updateSidebar(){
+  const g = Object.values(allGuests);
+  document.getElementById('sc-all').textContent     = g.length;
+  document.getElementById('sc-blocked').textContent = g.filter(x=>x.visitCount>=5).length;
+  document.getElementById('sc-warn').textContent    = g.filter(x=>x.visitCount>=3&&x.visitCount<5).length;
+  document.getElementById('sc-clean').textContent   = g.filter(x=>x.visitCount<3).length;
+}
+
+// ── Switch view ────────────────────────────────────
+function switchView(view){
+  currentView = view;
+  document.querySelectorAll('.sidebar-item').forEach(el=>{
+    el.classList.toggle('active', el.getAttribute('onclick')?.includes(`'${view}'`));
+  });
+  renderView(view);
+}
+
+function renderView(view){
+  document.getElementById('loader').style.display   = 'none';
+  document.getElementById('view-container').style.display = 'block';
+  const g = Object.values(allGuests);
+  switch(view){
+    case 'guests':       renderGuestsTable(g); break;
+    case 'blocked':      renderGuestsTable(g.filter(x=>x.visitCount>=5)); break;
+    case 'warning':      renderGuestsTable(g.filter(x=>x.visitCount>=3&&x.visitCount<5)); break;
+    case 'clean':        renderGuestsTable(g.filter(x=>x.visitCount<3)); break;
+    case 'fingerprints': renderFingerprintsView(g); break;
+    case 'ips':          renderIPView(g); break;
+    case 'behavioral':   renderBehavioralView(g); break;
+  }
+}
+
+// ── Helpers ────────────────────────────────────────
+function riskOf(g){
+  if(g.visitCount>=5) return {label:'Blocked', cls:'blocked'};
+  if(g.visitCount>=3) return {label:'Warning', cls:'warning'};
+  return {label:'Clean', cls:'clean'};
+}
+function fmtDate(iso){
+  if(!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'})
+       + ' ' + d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+function shortH(h){ return h ? h.substring(0,14)+'…' : '—'; }
+
+// ═══════════════════════════════════════════════════
+//  GUESTS TABLE
+// ═══════════════════════════════════════════════════
+function renderGuestsTable(guests){
+  const c = document.getElementById('view-container');
+  if(!guests.length){ c.innerHTML = emptyState('No guests found','No data matches this filter.'); return; }
+
+  const total = guests.length;
+  const blocked  = guests.filter(g=>g.visitCount>=5).length;
+  const warn     = guests.filter(g=>g.visitCount>=3&&g.visitCount<5).length;
+  const clean    = guests.filter(g=>g.visitCount<3).length;
+  const avgVisits= (guests.reduce((a,g)=>a+g.visitCount,0)/total).toFixed(1);
+
+  c.innerHTML = `
+  <div class="stats-row fade-in">
+    <div class="stat-box"><div class="stat-box-label">Total Guests</div><div class="stat-box-val">${total}</div><div class="stat-box-sub">All time</div></div>
+    <div class="stat-box"><div class="stat-box-label">Blocked</div><div class="stat-box-val red">${blocked}</div><div class="stat-box-sub">Trial expired / evading</div></div>
+    <div class="stat-box"><div class="stat-box-label">Near Limit</div><div class="stat-box-val yellow">${warn}</div><div class="stat-box-sub">3–4 visits used</div></div>
+    <div class="stat-box"><div class="stat-box-label">Clean</div><div class="stat-box-val green">${clean}</div><div class="stat-box-sub">Under 3 visits</div></div>
+    <div class="stat-box"><div class="stat-box-label">Avg Visits</div><div class="stat-box-val">${avgVisits}</div><div class="stat-box-sub">Per guest</div></div>
+  </div>
+
+  <div class="sec-header">
+    <div><div class="sec-title">Guest Signal Report</div><div class="sec-sub">Click any row to expand all 6 signals</div></div>
+    <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
+      <div class="filter-tabs">
+        <div class="ftab active" onclick="filterTable(this,'all')">All</div>
+        <div class="ftab" onclick="filterTable(this,'blocked')">Blocked</div>
+        <div class="ftab" onclick="filterTable(this,'warning')">Warning</div>
+        <div class="ftab" onclick="filterTable(this,'clean')">Clean</div>
+      </div>
+      <div class="search-bar">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8892b0" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search-input" placeholder="Search IP, fingerprint, country, guest ID…" oninput="filterSearch(this.value)"/>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-wrap fade-in">
+    <div class="table-scroll">
+      <table id="guests-table">
+        <thead><tr>
+          <th></th><th>Guest ID</th><th>Status</th><th>Visits</th>
+          <th>Server IP</th><th>Country</th><th>City</th>
+          <th>Fingerprint</th><th>WebRTC Local</th><th>WebRTC Public</th>
+          <th>Platform</th><th>First Seen</th><th>Last Seen</th>
+        </tr></thead>
+        <tbody id="guests-tbody">${guests.map(g=>guestRow(g)).join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function guestRow(g){
+  const risk     = riskOf(g);
+  const lv       = g.visits?.[g.visits.length-1] || {};
+  const geo      = bestGeo(g);
+  const fp       = lv.fingerprint || {};
+  const rtc      = lv.webrtc || {};
+  const br       = lv.browser || {};
+  const serverIP = g.signals?.serverIPs?.[0] || '—';
+
+  return `
+  <tr onclick="toggleExpand('${g.guestId}')" id="row-${g.guestId}">
+    <td><span class="chevron" id="chev-${g.guestId}">▼</span></td>
+    <td class="main-col"><span class="td-mono" title="${g.guestId}">${g.guestId.substring(0,18)}…</span></td>
+    <td><span class="badge badge-${risk.cls}">${risk.label}</span></td>
+    <td class="main-col">${g.visitCount} / 5</td>
+    <td><span class="td-mono">${serverIP}</span></td>
+    <td>${geo.country}</td>
+    <td>${geo.city}</td>
+    <td><span class="td-mono" title="${fp.hash||''}">${shortH(fp.hash)}</span></td>
+    <td><span class="td-mono">${rtc.localIP||'—'}</span></td>
+    <td><span class="td-mono">${rtc.publicIP||'—'}</span></td>
+    <td>${br.platform||'—'}</td>
+    <td>${fmtDate(g.firstSeen)}</td>
+    <td>${fmtDate(g.lastSeen)}</td>
+  </tr>
+  <tr class="td-expand-row" id="expand-${g.guestId}">
+    <td colspan="13">
+      <div class="expand-panel" id="panel-${g.guestId}">${expandPanel(g)}</div>
+    </td>
+  </tr>`;
+}
+
+function expandPanel(g){
+  const lv  = g.visits?.[g.visits.length-1] || {};
+  const fp  = lv.fingerprint || {};
+  const br  = lv.browser     || {};
+  const rtc = lv.webrtc      || {};
+  const gy  = lv.gyro        || {};
+  const beh = lv.behavioral  || {};
+  const ses = lv.session     || {};
+  const geo = bestGeo(g);
+  const clientIP = lv.clientIP || {};
+
+  return `
+  <div class="signal-grid">
+
+    <div class="signal-card">
+      <div class="signal-card-head"><div class="signal-icon">🔐</div><div class="signal-card-title">1 · Browser Fingerprint</div></div>
+      ${sr('Hash',      fp.hash,    true)}
+      ${sr('Canvas',    fp.canvas,  true)}
+      ${sr('WebGL',     fp.webgl,   true)}
+      ${sr('Audio',     fp.audio,   true)}
+      ${sr('Fonts',     fp.fonts!=null ? fp.fonts+' detected' : '—')}
+      ${sr('Plugins',   fp.plugins!=null ? fp.plugins+' found' : '—')}
+      ${sr('CPU Cores', br.cpu     || '—')}
+      ${sr('Memory',    br.mem     ? br.mem+' GB' : '—')}
+      ${sr('Screen',    br.screen  || '—')}
+      ${sr('Platform',  br.platform|| '—')}
+      ${sr('Language',  br.lang    || '—')}
+      ${sr('Timezone',  br.tz      || '—')}
+    </div>
+
+    <div class="signal-card">
+      <div class="signal-card-head"><div class="signal-icon">🌍</div><div class="signal-card-title">2 · IP & Geolocation</div></div>
+      ${sr('Server IP',     g.signals?.serverIPs?.[0] || '—', true)}
+      ${sr('Client IP',     clientIP.ip || '—',              true)}
+      ${sr('Country',       geo.country)}
+      ${sr('City',          geo.city)}
+      ${sr('ISP / Org',     geo.isp)}
+      ${sr('ASN',           geo.asn)}
+      ${sr('All IPs seen',  (g.signals?.serverIPs||[]).join(', ') || '—')}
+    </div>
+
+    <div class="signal-card">
+      <div class="signal-card-head"><div class="signal-icon">🍪</div><div class="signal-card-title">3 · Session & Cookies</div></div>
+      ${sr('Guest ID',      g.guestId,                         true)}
+      ${sr('Cookie Token',  g.signals?.cookies?.[0]    || '—', true)}
+      ${sr('LS Token',      g.signals?.lsTokens?.[0]   || '—', true)}
+      ${sr('First Seen',    fmtDate(g.firstSeen))}
+      ${sr('Last Seen',     fmtDate(g.lastSeen))}
+      ${sr('Total Visits',  g.visitCount)}
+      ${sr('Incognito Est.',ses.isIncognito!=null ? (ses.isIncognito?'⚠️ Likely YES':'No') : '—')}
+    </div>
+
+    <div class="signal-card">
+      <div class="signal-card-head"><div class="signal-icon">🖱️</div><div class="signal-card-title">4 · Behavioral Signals</div></div>
+      ${sr('Mouse Moves',      beh.mouseMoves      ?? '—')}
+      ${sr('Avg Mouse Speed',  beh.avgMouseSpeed!=null ? beh.avgMouseSpeed+'px/move' : '—')}
+      ${sr('Key Presses',      beh.keyPresses      ?? '—')}
+      ${sr('Avg Key Interval', beh.avgKeyInterval!=null ? beh.avgKeyInterval+'ms' : '—')}
+      ${sr('Clicks',           beh.clicks          ?? '—')}
+      ${sr('Scroll Depth',     beh.scrollDepth!=null ? beh.scrollDepth+'px' : '—')}
+      ${sr('Time on Page',     beh.timeOnPage      ? beh.timeOnPage+'s' : '—')}
+    </div>
+
+    <div class="signal-card">
+      <div class="signal-card-head"><div class="signal-icon">📡</div><div class="signal-card-title">5 · WebRTC</div></div>
+      ${sr('Local IP (LAN)',   rtc.localIP  || '—', true)}
+      ${sr('Public IP (STUN)', rtc.publicIP || '—', true)}
+      ${sr('IPv6',             rtc.ipv6     || 'None')}
+      ${sr('All Local IPs',    (g.signals?.webrtcLocal ||[]).filter(Boolean).join(', ')  || '—')}
+      ${sr('All Public IPs',   (g.signals?.webrtcPublic||[]).filter(Boolean).join(', ') || '—')}
+      ${sr('VPN Mismatch',     (rtc.publicIP && clientIP.ip && rtc.publicIP!==clientIP.ip) ? '⚠️ YES' : 'No')}
+    </div>
+
+    <div class="signal-card">
+      <div class="signal-card-head"><div class="signal-icon">📱</div><div class="signal-card-title">6 · Gyroscope / Motion</div></div>
+      ${sr('Device Type', gy.isMobile ? '📱 Mobile' : '🖥️ Desktop')}
+      ${sr('Alpha (Z)',   gy.alpha ?? '—')}
+      ${sr('Beta (X)',    gy.beta  ?? '—')}
+      ${sr('Gamma (Y)',   gy.gamma ?? '—')}
+      ${sr('Accel X',     gy.ax    ?? '—')}
+      ${sr('Accel Y',     gy.ay    ?? '—')}
+      ${sr('Accel Z',     gy.az    ?? '—')}
+    </div>
+
+  </div>
+
+  <div class="visit-timeline">
+    <div class="visit-timeline-title">Visit History (${g.visits?.length||0} total)</div>
+    ${(g.visits||[]).slice().reverse().slice(0,8).map((v,i)=>`
+      <div class="visit-item">
+        <div class="visit-dot"></div>
+        <div>
+          <div style="font-size:.78rem;color:var(--white);font-weight:500">
+            Visit #${g.visits.length - i} — ${fmtDate(v.ts)}
+          </div>
+          <div class="visit-meta">
+            IP: ${v.serverIP||'—'} ·
+            ${geoCountry(g.geoHistory?.find(h=>h.ip===v.serverIP)||{}) !== '—'
+              ? geoCountry(g.geoHistory?.find(h=>h.ip===v.serverIP)||{}) + ' · '
+              : ''}
+            Screen: ${v.browser?.screen||'—'} · Platform: ${v.browser?.platform||'—'}
+          </div>
+          <div class="visit-sigs">
+            ${v.fingerprint?.hash   ? `<span class="visit-sig-chip">FP: ${v.fingerprint.hash.substring(0,10)}…</span>` : ''}
+            ${v.webrtc?.localIP     ? `<span class="visit-sig-chip">LAN: ${v.webrtc.localIP}</span>` : ''}
+            ${v.webrtc?.publicIP    ? `<span class="visit-sig-chip">WAN: ${v.webrtc.publicIP}</span>` : ''}
+            ${v.behavioral?.timeOnPage ? `<span class="visit-sig-chip">⏱ ${v.behavioral.timeOnPage}s</span>` : ''}
+            ${v.behavioral?.mouseMoves ? `<span class="visit-sig-chip">🖱 ${v.behavioral.mouseMoves} moves</span>` : ''}
+            ${v.gyro?.isMobile      ? `<span class="visit-sig-chip">📱 α${v.gyro.alpha}</span>` : ''}
+          </div>
+        </div>
+      </div>`).join('')}
+  </div>`;
+}
+
+// Signal row helper
+function sr(key, val, mono=false){
+  const display   = (val!=null && val!=='') ? String(val) : '—';
+  const truncated = display.length>32 ? display.substring(0,32)+'…' : display;
+  const safe      = display.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  return `<div class="signal-row">
+    <span class="signal-key">${key}</span>
+    <span class="signal-val${mono?' mono':''}" title="${display}">${truncated}${
+      display.length>10
+        ? `<button class="copy-btn" onclick="event.stopPropagation();copyText('${safe}')">⧉</button>`
+        : ''
+    }</span>
+  </div>`;
+}
+
+// ── Toggle expand ──────────────────────────────────
+function toggleExpand(id){
+  const panel = document.getElementById(`panel-${id}`);
+  const chev  = document.getElementById(`chev-${id}`);
+  const row   = document.getElementById(`row-${id}`);
+  const open  = panel.classList.contains('open');
+  document.querySelectorAll('.expand-panel.open').forEach(p=>p.classList.remove('open'));
+  document.querySelectorAll('.chevron.open').forEach(c=>c.classList.remove('open'));
+  document.querySelectorAll('tbody tr.expanded').forEach(r=>r.classList.remove('expanded'));
+  if(!open){ panel.classList.add('open'); chev.classList.add('open'); row.classList.add('expanded'); }
+}
+
+// ── Filter tabs ────────────────────────────────────
+function filterTable(el, filter){
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const all = Object.values(allGuests);
+  const filtered = filter==='blocked' ? all.filter(g=>g.visitCount>=5)
+                 : filter==='warning' ? all.filter(g=>g.visitCount>=3&&g.visitCount<5)
+                 : filter==='clean'   ? all.filter(g=>g.visitCount<3)
+                 : all;
+  renderTbody(applySearch(filtered, document.getElementById('search-input')?.value||''));
+}
+
+// ── Search ─────────────────────────────────────────
+function filterSearch(q){
+  renderTbody(applySearch(Object.values(allGuests), q));
+}
+function applySearch(guests, q){
+  if(!q) return guests;
+  const lq = q.toLowerCase();
+  return guests.filter(g=>{
+    const geo = bestGeo(g);
+    const lv  = g.visits?.[g.visits.length-1]||{};
+    return (
+      g.guestId.toLowerCase().includes(lq) ||
+      (g.signals?.serverIPs||[]).some(ip=>ip.includes(lq)) ||
+      (lv.fingerprint?.hash||'').toLowerCase().includes(lq) ||
+      geo.country.toLowerCase().includes(lq) ||
+      geo.city.toLowerCase().includes(lq) ||
+      geo.isp.toLowerCase().includes(lq)
+    );
+  });
+}
+function renderTbody(guests){
+  const tb = document.getElementById('guests-tbody');
+  if(tb) tb.innerHTML = guests.map(g=>guestRow(g)).join('');
+}
+
+// ═══════════════════════════════════════════════════
+//  FINGERPRINTS VIEW
+// ═══════════════════════════════════════════════════
+function renderFingerprintsView(guests){
+  const c = document.getElementById('view-container');
+  const fpMap = {};
+  guests.forEach(g=>{
+    (g.signals?.fingerprints||[]).forEach(fp=>{
+      if(!fpMap[fp]) fpMap[fp]={hash:fp,guests:[]};
+      fpMap[fp].guests.push(g.guestId);
+    });
+  });
+  const dupes = Object.values(fpMap).filter(f=>f.guests.length>1);
+
+  c.innerHTML=`
+  <div class="stats-row fade-in">
+    <div class="stat-box"><div class="stat-box-label">Unique Fingerprints</div><div class="stat-box-val">${Object.keys(fpMap).length}</div></div>
+    <div class="stat-box"><div class="stat-box-label">Duplicate FPs</div><div class="stat-box-val red">${dupes.length}</div><div class="stat-box-sub">Shared across guests</div></div>
+    <div class="stat-box"><div class="stat-box-label">Guests Checked</div><div class="stat-box-val">${guests.length}</div></div>
+  </div>
+  <div class="sec-header"><div><div class="sec-title">Fingerprint Registry</div>
+  <div class="sec-sub">Duplicate fingerprints = same physical device across multiple guest sessions</div></div></div>
+  <div class="table-wrap fade-in"><div class="table-scroll"><table>
+    <thead><tr><th>Fingerprint Hash</th><th>Times Seen</th><th>Linked Guests</th><th>Risk</th></tr></thead>
+    <tbody>
+    ${Object.values(fpMap).sort((a,b)=>b.guests.length-a.guests.length).map(f=>`
+      <tr>
+        <td><span class="td-mono">${f.hash.substring(0,30)}…</span>
+          <button class="copy-btn" onclick="copyText('${f.hash}')">⧉</button></td>
+        <td class="main-col">${f.guests.length}</td>
+        <td style="max-width:320px;white-space:normal;font-size:.72rem;color:var(--muted)">
+          ${f.guests.map(id=>`<span class="visit-sig-chip">${id.substring(0,16)}…</span>`).join(' ')}
+        </td>
+        <td>${f.guests.length>1
+          ? '<span class="badge badge-blocked">Duplicate</span>'
+          : '<span class="badge badge-clean">Unique</span>'}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table></div></div>`;
+}
+
+// ═══════════════════════════════════════════════════
+//  IP VIEW
+// ═══════════════════════════════════════════════════
+function renderIPView(guests){
+  const c = document.getElementById('view-container');
+  const ipMap = {};
+  guests.forEach(g=>{
+    (g.signals?.serverIPs||[]).forEach(ip=>{
+      if(!ipMap[ip]){
+        // Find the matching geoHistory entry and resolve field names
+        const geoEntry = g.geoHistory?.find(h=>h.ip===ip) || {};
+        ipMap[ip] = {
+          ip,
+          guests:[],
+          country: geoCountry(geoEntry),
+          city:    geoCity(geoEntry),
+          isp:     geoISP(geoEntry),
+          asn:     geoASN(geoEntry),
+        };
+      }
+      if(!ipMap[ip].guests.includes(g.guestId)) ipMap[ip].guests.push(g.guestId);
+    });
+  });
+  const dupeIPs = Object.values(ipMap).filter(i=>i.guests.length>1);
+  const countries = new Set(Object.values(ipMap).map(i=>i.country).filter(c=>c&&c!=='—'));
+
+  c.innerHTML=`
+  <div class="stats-row fade-in">
+    <div class="stat-box"><div class="stat-box-label">Unique IPs</div><div class="stat-box-val">${Object.keys(ipMap).length}</div></div>
+    <div class="stat-box"><div class="stat-box-label">Shared IPs</div><div class="stat-box-val yellow">${dupeIPs.length}</div><div class="stat-box-sub">Used by 2+ guests</div></div>
+    <div class="stat-box"><div class="stat-box-label">Countries</div><div class="stat-box-val">${countries.size}</div></div>
+  </div>
+  <div class="sec-header"><div><div class="sec-title">IP & Geolocation Registry</div>
+  <div class="sec-sub">Shared IPs across guests indicate trial evasion via browser or incognito switching</div></div></div>
+  <div class="table-wrap fade-in"><div class="table-scroll"><table>
+    <thead><tr><th>IP Address</th><th>Country</th><th>City</th><th>ISP / Org</th><th>ASN</th><th>Guests</th><th>Risk</th></tr></thead>
+    <tbody>
+    ${Object.values(ipMap).sort((a,b)=>b.guests.length-a.guests.length).map(i=>`
+      <tr>
+        <td><span class="td-mono">${i.ip}</span>
+          <button class="copy-btn" onclick="copyText('${i.ip}')">⧉</button></td>
+        <td>${i.country}</td>
+        <td>${i.city}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis">${i.isp}</td>
+        <td><span class="td-mono">${i.asn}</span></td>
+        <td class="main-col">${i.guests.length}</td>
+        <td>${i.guests.length>1
+          ? '<span class="badge badge-warning">Shared</span>'
+          : '<span class="badge badge-clean">Unique</span>'}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table></div></div>`;
+}
+
+// ═══════════════════════════════════════════════════
+//  BEHAVIORAL VIEW
+// ═══════════════════════════════════════════════════
+function renderBehavioralView(guests){
+  const c = document.getElementById('view-container');
+  c.innerHTML=`
+  <div class="sec-header fade-in"><div>
+    <div class="sec-title">Behavioral Signals</div>
+    <div class="sec-sub">Mouse, keyboard, scroll and time patterns per guest — updated every 20 seconds</div>
+  </div></div>
+  <div class="table-wrap fade-in"><div class="table-scroll"><table>
+    <thead><tr>
+      <th>Guest ID</th><th>Country</th><th>Mouse Moves</th><th>Avg Speed</th>
+      <th>Key Presses</th><th>Avg Interval</th><th>Clicks</th>
+      <th>Scroll Depth</th><th>Time on Page</th><th>Device</th>
+    </tr></thead>
+    <tbody>
+    ${guests.map(g=>{
+      const lv  = g.visits?.[g.visits.length-1]||{};
+      const b   = lv.behavioral||{};
+      const gy  = lv.gyro||{};
+      const geo = bestGeo(g);
+      return `<tr>
+        <td><span class="td-mono">${g.guestId.substring(0,18)}…</span></td>
+        <td>${geo.country}</td>
+        <td class="main-col">${b.mouseMoves??'—'}</td>
+        <td>${b.avgMouseSpeed!=null?b.avgMouseSpeed+'px':'—'}</td>
+        <td class="main-col">${b.keyPresses??'—'}</td>
+        <td>${b.avgKeyInterval!=null?b.avgKeyInterval+'ms':'—'}</td>
+        <td>${b.clicks??'—'}</td>
+        <td>${b.scrollDepth!=null?b.scrollDepth+'px':'—'}</td>
+        <td class="main-col">${b.timeOnPage?b.timeOnPage+'s':'—'}</td>
+        <td>${gy.isMobile?'📱 Mobile':'🖥️ Desktop'}</td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+  </table></div></div>`;
+}
+
+// ── Error & empty states ───────────────────────────
+function renderError(msg){
+  document.getElementById('loader').style.display='none';
+  document.getElementById('view-container').style.display='block';
+  document.getElementById('view-container').innerHTML=`
+  <div class="empty-state">
+    <div class="empty-icon">⚠️</div>
+    <div class="empty-title">Cannot reach server</div>
+    <div class="empty-sub">Make sure <code style="color:var(--gold2)">node server.js</code> is running on port 3000.<br/><br/>${msg}</div>
+  </div>`;
+}
+function emptyState(title,sub){
+  return `<div class="empty-state">
+    <div class="empty-icon">🔍</div>
+    <div class="empty-title">${title}</div>
+    <div class="empty-sub">${sub}</div>
+  </div>`;
+}
+function showClearModal(){
+  const m = document.getElementById('clear-modal');
+  m.style.display = 'flex';
+  document.getElementById('clear-pass-input').value = '';
+  document.getElementById('clear-error').textContent = '';
+  setTimeout(()=>document.getElementById('clear-pass-input').focus(), 50);
+}
+function hideClearModal(){
+  document.getElementById('clear-modal').style.display = 'none';
+}
+async function confirmClear(){
+  const pw = document.getElementById('clear-pass-input').value;
+  if(!pw){ document.getElementById('clear-error').textContent = 'Please enter the password.'; return; }
+  try{
+    const res = await fetch('http://localhost:3000/api/logs/clear', {
+      method:'DELETE',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({password: pw})
+    });
+    const data = await res.json();
+    if(!res.ok){ document.getElementById('clear-error').textContent = data.error || 'Wrong password.'; return; }
+    hideClearModal();
+    allGuests = {};
+    updateSidebar();
+    renderView(currentView);
+    adminToast('🗑️ All data cleared.', 3000);
+  } catch(e){
+    document.getElementById('clear-error').textContent = 'Server error: '+e.message;
+  }
+}
+// Close modal on backdrop click
+document.getElementById('clear-modal').addEventListener('click', function(e){
+  if(e.target===this) hideClearModal();
+});
+
+// ── Boot — load once, then refresh every 30 seconds ─
+loadAdminData();
+// Manual refresh only — remove auto-interval, or set to 60s
+// setInterval(loadAdminData, 60000);
+</script>
+
+<div id="clear-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);align-items:center;justify-content:center">
+  <div style="background:#0d1338;border:1px solid rgba(239,68,68,.4);border-radius:16px;padding:2rem;width:360px;max-width:90vw;box-shadow:0 24px 60px rgba(0,0,0,.6)">
+    <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#f87171;margin-bottom:.4rem">⚠️ Clear All Data</div>
+    <div style="font-size:.82rem;color:#8892b0;margin-bottom:1.4rem;line-height:1.6">This will permanently delete all guest records from <code style="color:#e8c66a">onemfb_guests.json</code>. Enter your admin password to confirm.</div>
+    <input id="clear-pass-input" type="password" placeholder="Admin password…"
+      style="width:100%;padding:.6rem .85rem;border-radius:8px;border:1px solid rgba(201,168,76,.3);background:rgba(6,9,30,.9);color:#f0f4ff;font-size:.85rem;outline:none;margin-bottom:.5rem"
+      onkeydown="if(event.key==='Enter')confirmClear()"/>
+    <div id="clear-error" style="font-size:.75rem;color:#f87171;min-height:1rem;margin-bottom:.8rem"></div>
+    <div style="display:flex;gap:.7rem;justify-content:flex-end">
+      <button onclick="hideClearModal()" style="padding:.45rem 1.1rem;border-radius:7px;border:1px solid rgba(201,168,76,.25);background:transparent;color:#8892b0;cursor:pointer;font-size:.82rem">Cancel</button>
+      <button onclick="confirmClear()" style="padding:.45rem 1.1rem;border-radius:7px;border:none;background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;cursor:pointer;font-size:.82rem;font-weight:700">Delete All</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
